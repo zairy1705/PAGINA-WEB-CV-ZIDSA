@@ -1,7 +1,7 @@
-import React, { useState, useRef, useEffect } from 'react';
-import { ArrowDownRight, FileDown, Mail, ShieldCheck, Award, Sparkles, CheckCircle2, Camera, RefreshCw } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { ArrowDownRight, FileDown, Mail, ShieldCheck, Award, Sparkles, CheckCircle2 } from 'lucide-react';
 import { PERSONAL_INFO } from '../data/cvData';
-import defaultPortraitImg from '../assets/images/zaira_salvador_studio_portrait_1791900381465.jpg';
+import defaultPortraitImg from '../assets/images/zaira_authentic_id_photo_1792453734195.jpg';
 
 interface HeroProps {
   onOpenCvModal: () => void;
@@ -9,53 +9,14 @@ interface HeroProps {
 
 export const Hero: React.FC<HeroProps> = ({ onOpenCvModal }) => {
   const [currentPortrait, setCurrentPortrait] = useState<string>(defaultPortraitImg);
-  const [isCustomImage, setIsCustomImage] = useState<boolean>(false);
-  const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    // Check if the user previously uploaded a custom photo in their browser
+    // If a custom portrait was uploaded in browser localStorage, use it; otherwise maintain fixed default
     const savedImg = localStorage.getItem('zaira_custom_portrait');
     if (savedImg) {
       setCurrentPortrait(savedImg);
-      setIsCustomImage(true);
-      // Auto-persist to server disk so it becomes the permanent image for all visitors
-      fetch('/api/save-portrait', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ image: savedImg }),
-      }).catch(() => {});
     }
   }, []);
-
-  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        const base64 = reader.result as string;
-        setCurrentPortrait(base64);
-        setIsCustomImage(true);
-        try {
-          localStorage.setItem('zaira_custom_portrait', base64);
-        } catch {
-          // localStorage full or quota exceeded, ignore
-        }
-        // Persist permanently to server disk so it remains for everyone
-        fetch('/api/save-portrait', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ image: base64 }),
-        }).catch(() => {});
-      };
-      reader.readAsDataURL(file);
-    }
-  };
-
-  const handleResetImage = () => {
-    setCurrentPortrait(defaultPortraitImg);
-    setIsCustomImage(false);
-    localStorage.removeItem('zaira_custom_portrait');
-  };
   return (
     <section id="inicio" className="relative pt-28 pb-16 lg:pt-36 lg:pb-24 overflow-hidden bg-gradient-to-b from-slate-50/70 via-white to-white">
       {/* Subtle scientific background elements: molecular grid & light beams */}
@@ -197,35 +158,6 @@ export const Hero: React.FC<HeroProps> = ({ onOpenCvModal }) => {
                 
                 {/* Subtle gradient vignette at bottom */}
                 <div className="absolute inset-0 bg-gradient-to-t from-slate-950/70 via-transparent to-transparent pointer-events-none" />
-
-                {/* Photo quick action controls */}
-                <div className="absolute top-3 right-3 flex items-center gap-1.5 z-20">
-                  <input
-                    ref={fileInputRef}
-                    type="file"
-                    accept="image/*"
-                    onChange={handleImageUpload}
-                    className="hidden"
-                  />
-                  <button
-                    onClick={() => fileInputRef.current?.click()}
-                    title="Cargar tu fotografía personalizada"
-                    className="p-2 rounded-lg bg-black/50 hover:bg-black/75 text-white/90 hover:text-white backdrop-blur-md transition-all shadow-md cursor-pointer flex items-center gap-1 text-[11px] font-medium"
-                  >
-                    <Camera className="w-3.5 h-3.5" />
-                    <span className="hidden sm:inline">Cambiar foto</span>
-                  </button>
-
-                  {isCustomImage && (
-                    <button
-                      onClick={handleResetImage}
-                      title="Restablecer fotografía"
-                      className="p-2 rounded-lg bg-black/50 hover:bg-black/75 text-white/90 hover:text-white backdrop-blur-md transition-all shadow-md cursor-pointer"
-                    >
-                      <RefreshCw className="w-3.5 h-3.5" />
-                    </button>
-                  )}
-                </div>
 
                 {/* Subtitle tag directly inside the image at bottom */}
                 <div className="absolute bottom-4 left-4 right-4 text-white pointer-events-none">
